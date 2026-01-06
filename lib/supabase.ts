@@ -1,6 +1,45 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://qoooeuhafwxbastarxuc.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvb29ldWhhZnd4YmFzdGFyeHVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0NzE0NTUsImV4cCI6MjA4MjA0NzQ1NX0.5M7dA65jDzAMsYe0oMh0vEb9Va5w__b7tsz2fNoYTPw';
+// Get credentials from environment variables
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Validate environment variables
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase credentials. Please check your .env file.\n' +
+    'Required variables:\n' +
+    '- EXPO_PUBLIC_SUPABASE_URL\n' +
+    '- EXPO_PUBLIC_SUPABASE_ANON_KEY'
+  )
+}
+
+// Create Supabase client
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Enable auto token refresh
+    autoRefreshToken: true,
+    // Persist session in storage
+    persistSession: true,
+    // Detect session from URL (for web)
+    detectSessionInUrl: false,
+  },
+})
+
+// Helper to check if Supabase is configured correctly
+export async function testSupabaseConnection() {
+  try {
+    const { data, error } = await supabase.from('profiles').select('count')
+    
+    if (error) {
+      console.error('Supabase connection error:', error)
+      return false
+    }
+    
+    console.log('✅ Supabase connected successfully')
+    return true
+  } catch (error) {
+    console.error('Supabase connection failed:', error)
+    return false
+  }
+}

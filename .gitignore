@@ -1,8 +1,15 @@
 
 # Environment variables
 .env
+.env.local
+.env.*.local
 supabase-credentials.txt
 
+
+*.pem
+*.key
+*.p12
+*.jks
 # Bun
 bun.lockb
 
